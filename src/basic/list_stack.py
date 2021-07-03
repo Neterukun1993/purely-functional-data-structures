@@ -16,7 +16,7 @@ class ListStack(metaclass=MetaSingleton):
             ptr = ptr.tail()
 
     def cons(self, value):
-        return ListStack(value, self)
+        return self.__class__(value, self)
 
     def head(self):
         if self is self.__class__.Nil[self.__class__]:
