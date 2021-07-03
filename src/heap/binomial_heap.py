@@ -1,4 +1,4 @@
-from src.heap.list_stack import ListStack
+from src.basic.list_stack import ListStack
 
 
 class BinomialTree:
