@@ -7,7 +7,7 @@ class ListStack(metaclass=MetaSingleton):
         self._tail = tail
 
     def __bool__(self):
-        return self is not ListStack.Nil[ListStack]
+        return self is not self.__class__.Nil[self.__class__]
 
     def __iter__(self):
         ptr = self
@@ -19,17 +19,17 @@ class ListStack(metaclass=MetaSingleton):
         return ListStack(value, self)
 
     def head(self):
-        if self is ListStack.Nil[ListStack]:
+        if self is self.__class__.Nil[self.__class__]:
             raise IndexError("pop from empty list")
         return self._head
 
     def tail(self):
-        if self is ListStack.Nil[ListStack]:
+        if self is self.__class__.Nil[self.__class__]:
             raise IndexError("pop from empty list")
         return self._tail
 
     def reverse(self):
-        ret = ListStack.Nil[ListStack]
+        ret = self.__class__.Nil[self.__class__]
         for x in self:
             ret = ret.cons(x)
         return ret
