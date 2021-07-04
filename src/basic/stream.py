@@ -47,6 +47,22 @@ class Stream:
             for x in self:
                 ret = ret.cons(x)
             return ret.strm
-        if self is Stream.Nil:
+        return Stream(func)
+
+    def take(self, n):
+        if n == 0 or not self:
             return Stream.Nil
+        func = lambda: (self.head(), self.tail().take(n - 1))
+        return Stream(func)
+
+    def drop(self, n):
+        def func():
+            ret = self
+            for _ in range(n):
+                if not ret:
+                    break
+                ret = ret.tail()
+            if ret:
+                ret.tail()
+            return ret.strm
         return Stream(func)
