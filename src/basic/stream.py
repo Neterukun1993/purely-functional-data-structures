@@ -31,6 +31,10 @@ class Stream:
             self.strm = self.strm()
         return self.strm[1]
 
+    @staticmethod
+    def stream_cell(func):
+        return Stream(func)
+
     def concat(self, other):
         if not self:
             return other

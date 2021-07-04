@@ -39,3 +39,19 @@ class ListStack(metaclass=MetaSingleton):
         for x in self.reverse():
             ret = ret.cons(x)
         return ret
+
+    def take(self, n):
+        ret = self.__class__.Nil[self.__class__] 
+        for i, x in enumerate(self):
+            if i == n:
+                break
+            ret = ret.cons(x)
+        return ret.reverse()
+
+    def drop(self, n):
+        ret = self
+        for _ in range(n):
+            if not ret:
+                break
+            ret = ret.tail()
+        return ret
