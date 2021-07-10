@@ -1,8 +1,14 @@
-class Suspension:
-    def __init__(self, func):
-        self.func = func
+from typing import TypeVar, Generic, Callable, Union
 
-    def force(self):
+
+T = TypeVar('T')
+
+
+class Suspension(Generic[T]):
+    def __init__(self, func: Callable[[], T]) -> None:
+        self.func: Union[T, Callable[[], T]] = func
+
+    def force(self) -> T:
         if callable(self.func):
             self.func = self.func()
         return self.func
