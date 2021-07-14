@@ -42,21 +42,10 @@ class BottomUpMergeSort(Generic[T]):
 
     def sort(self) -> ListStack[T]:
         def merge_all(xs: ListStack[T],
-                      seg_list: ListStack[T]) -> ListStack[T]:
+                      seg_list: ListStack[ListStack[T]]) -> ListStack[T]:
             if not seg_list:
                 return xs
             return merge_all(BottomUpMergeSort._merge(xs, seg_list.head()),
                              seg_list.tail())
 
         return merge_all(ListStack(), self.segs.force())
-
-
-a = BottomUpMergeSort[int]()
-a = a.add(12)
-a = a.add(1)
-a = a.add(2)
-a = a.add(1)
-a = a.add(12)
-b = a.sort()
-print(type(a))
-print([i for i in b])
