@@ -9,7 +9,7 @@ class RealTimeQueue:
         self.s = Stream() if s is None else s
 
     def __bool__(self):
-        return self.f is not Stream.Nil
+        return self.f is not Stream()
 
     @staticmethod
     def _rotate(f, r, s):
@@ -18,7 +18,7 @@ class RealTimeQueue:
         func = lambda: (f.head(), RealTimeQueue._rotate(f.tail(),
                                                         r.tail(),
                                                         s.cons(r.head())))
-        return Stream.stream_cell(func)
+        return Stream(func)
 
     def _exec(self):
         if self.s:
