@@ -1,62 +1,61 @@
-class Stream:
-    Nil = None
+from __future__ import annotations
+from typing import *
+from src.basic.meta_singleton import MetaSingleton
 
-    def __new__(cls, *args):
-        if cls.Nil is None:
-            cls.Nil = super().__new__(cls)
-        return super().__new__(cls) if args else cls.Nil
 
-    def __init__(self, strm=None):
-        self.strm = strm
+T = TypeVar('T')
+StreamPair = Tuple[T, 'Stream[T]']
+StreamCell = Union[None, Callable[[], StreamPair[T]], StreamPair[T]]
 
-    def __bool__(self):
-        return self is not Stream.Nil
 
-    def __iter__(self):
+class Stream(Generic[T], metaclass=MetaSingleton):
+    def __init__(self, stream_cell: StreamCell[T] = None) -> None:
+        self.stream_cell = stream_cell
+
+    def __bool__(self) -> bool:
+        return self is not Stream()
+
+    def __iter__(self) -> Iterator[T]:
         ptr = self
         while ptr:
             yield ptr.head()
             ptr = ptr.tail()
 
-    def cons(self, value):
+    def cons(self, value: T) -> Stream[T]:
         return Stream((value, self))
 
-    def head(self):
-        if callable(self.strm):
-            self.strm = self.strm()
-        return self.strm[0]
+    def head(self) -> T:
+        if callable(self.stream_cell):
+            self.stream_cell = self.stream_cell()
+        return cast(StreamPair[T], self.stream_cell)[0]
 
-    def tail(self):
-        if callable(self.strm):
-            self.strm = self.strm()
-        return self.strm[1]
+    def tail(self) -> Stream[T]:
+        if callable(self.stream_cell):
+            self.stream_cell = self.stream_cell()
+        return cast(StreamPair[T], self.stream_cell)[1]
 
-    @staticmethod
-    def stream_cell(func):
-        return Stream(func)
-
-    def concat(self, other):
+    def concat(self, other: Stream[T]) -> Stream[T]:
         if not self:
             return other
         func = lambda: (self.head(), self.tail().concat(other))
         return Stream(func)
 
-    def reverse(self):
-        def func():
-            ret = Stream.Nil
+    def reverse(self) -> Stream[T]:
+        def func() -> StreamPair[T]:
+            ret = Stream[T]()
             for x in self:
                 ret = ret.cons(x)
-            return ret.strm
+            return cast(StreamPair[T], ret.stream_cell)
         return Stream(func)
 
-    def take(self, n):
+    def take(self, n: int) -> Stream[T]:
         if n == 0 or not self:
-            return Stream.Nil
+            return Stream()
         func = lambda: (self.head(), self.tail().take(n - 1))
         return Stream(func)
 
-    def drop(self, n):
-        def func():
+    def drop(self, n: int) -> Stream[T]:
+        def func() -> StreamPair[T]:
             ret = self
             for _ in range(n):
                 if not ret:
@@ -64,5 +63,5 @@ class Stream:
                 ret = ret.tail()
             if ret:
                 ret.tail()
-            return ret.strm
+            return cast(StreamPair[T], ret.stream_cell)
         return Stream(func)
