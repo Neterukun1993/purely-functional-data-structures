@@ -1,13 +1,15 @@
 import pytest
-from src.queue.real_time_queue import RealTimeQueue
+from src.queue.bootstrapped_queue_with_real_time_queue import (
+    BootstrappedQueue
+)
 
 
 @pytest.fixture
 def empty_queue():
-    return RealTimeQueue()
+    return BootstrappedQueue()
 
 
-class TestList:
+class TestBootstrappedQueue:
 
     def test_truth_value(self, empty_queue):
         assert not empty_queue
