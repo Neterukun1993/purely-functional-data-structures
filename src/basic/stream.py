@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import *
+from typing import TypeVar, Generic, cast, Tuple, Union, Callable
 from src.basic.meta_singleton import MetaSingleton
 
 
@@ -13,7 +13,7 @@ class Stream(Generic[T], metaclass=MetaSingleton):
         self.stream_cell = stream_cell
 
     def __bool__(self) -> bool:
-        return self is not Stream()
+        return self is not Stream[T]()
 
     def __iter__(self) -> Iterator[T]:
         ptr = self
@@ -25,11 +25,15 @@ class Stream(Generic[T], metaclass=MetaSingleton):
         return Stream((value, self))
 
     def head(self) -> T:
+        if self is Stream[T]():
+            raise IndexError("head from empty stream")
         if callable(self.stream_cell):
             self.stream_cell = self.stream_cell()
         return cast(StreamPair[T], self.stream_cell)[0]
 
     def tail(self) -> Stream[T]:
+        if self is Stream[T]():
+            raise IndexError("tail from empty stream")
         if callable(self.stream_cell):
             self.stream_cell = self.stream_cell()
         return cast(StreamPair[T], self.stream_cell)[1]
@@ -38,7 +42,7 @@ class Stream(Generic[T], metaclass=MetaSingleton):
         if not self:
             return other
         func = lambda: (self.head(), self.tail().concat(other))
-        return Stream(func)
+        return Stream[T](func)
 
     def reverse(self) -> Stream[T]:
         def func() -> StreamPair[T]:
@@ -50,9 +54,9 @@ class Stream(Generic[T], metaclass=MetaSingleton):
 
     def take(self, n: int) -> Stream[T]:
         if n == 0 or not self:
-            return Stream()
+            return Stream[T]()
         func = lambda: (self.head(), self.tail().take(n - 1))
-        return Stream(func)
+        return Stream[T](func)
 
     def drop(self, n: int) -> Stream[T]:
         def func() -> StreamPair[T]:
@@ -64,4 +68,4 @@ class Stream(Generic[T], metaclass=MetaSingleton):
             if ret:
                 ret.tail()
             return cast(StreamPair[T], ret.stream_cell)
-        return Stream(func)
+        return Stream[T](func)
