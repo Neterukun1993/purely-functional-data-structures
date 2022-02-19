@@ -1,22 +1,32 @@
-from src.basic.meta_singleton import MetaSingleton
-from src.basic.suspension import Suspension
-from src.queue.real_time_queue import RealTimeQueue
+from __future__ import annotations
+from typing import TypeVar, Generic, Optional, cast
+from src.basic.meta_singleton import MetaSingleton  # type: ignore
+from src.basic.suspension import Suspension  # type: ignore
+from src.queue.real_time_queue import RealTimeQueue  # type: ignore
 
 
-class CatenableList(metaclass=MetaSingleton):
-    def __init__(self, _head=None, q=None):
-        self._head = _head
-        self.q = RealTimeQueue() if q is None else q
+T = TypeVar('T')
 
-    def __bool__(self):
+
+class CatenableList(Generic[T], metaclass=MetaSingleton):
+    def __init__(self, _head: Optional[T] = None,
+                 q: Optional[RealTimeQueue[T]] = None) -> None:
+        self._head: Optional[T] = _head
+        self.q: RealTimeQueue[Suspension[CatenableList[T]]] = (
+            RealTimeQueue() if q is None else q
+        )
+
+    def __bool__(self) -> bool:
         return self is not CatenableList()
 
-    def _link(self, susp):
-        return CatenableList(self._head, self.q.snoc(susp))
+    def _link(self, susp: Suspension[CatenableList[T]]) -> CatenableList[T]:
+        return CatenableList[T](self._head, self.q.snoc(susp))
 
     @staticmethod
-    def _link_all(q):
-        t = q.head().force()
+    def _link_all(
+            q: RealTimeQueue[Suspension[CatenableList[T]]]
+            ) -> CatenableList[T]:
+        t: CatenableList[T] = q.head().force()
         q_tail = q.tail()
         if q_tail:
             susp = Suspension(lambda: CatenableList._link_all(q_tail))
@@ -24,25 +34,26 @@ class CatenableList(metaclass=MetaSingleton):
         else:
             return t
 
-    def concat(self, other):
+    def concat(self, other: CatenableList[T]) -> CatenableList[T]:
         if not other:
             return self
         if not self:
             return other
         return self._link(Suspension(other))
 
-    def cons(self, value):
+    def cons(self, value: T) -> CatenableList[T]:
         return CatenableList(value, RealTimeQueue()).concat(self)
 
-    def snoc(self, value):
+    def snoc(self, value: T) -> CatenableList[T]:
         return self.concat(CatenableList(value, RealTimeQueue()))
 
-    def head(self):
+    def head(self) -> T:
         if not self:
             raise IndexError("head from empty list")
-        return self._head
+        head = cast(T, self._head)
+        return head
 
-    def tail(self):
+    def tail(self) -> CatenableList[T]:
         if not self:
             raise IndexError("tail from empty list")
         if self.q:

@@ -1,17 +1,24 @@
-from src.basic.list_stack import ListStack
+from __future__ import annotations
+from typing import TypeVar, Generic, Optional
+from src.basic.list_stack import ListStack  # type: ignore
 
 
-class BatchedDeque:
-    def __init__(self, fsize=0, f=None, rsize=0, r=None):
-        self.fsize = fsize
-        self.f = ListStack() if f is None else f
-        self.rsize = rsize
-        self.r = ListStack() if r is None else r
+T = TypeVar('T')
 
-    def __bool__(self):
+
+class BatchedDeque(Generic[T]):
+    def __init__(self,
+                 fsize: int = 0, f: Optional[ListStack[T]] = None,
+                 rsize: int = 0, r: Optional[ListStack[T]] = None) -> None:
+        self.fsize: int = fsize
+        self.f: ListStack[T] = ListStack() if f is None else f
+        self.rsize: int = rsize
+        self.r: ListStack[T] = ListStack() if r is None else r
+
+    def __bool__(self) -> bool:
         return self.fsize + self.rsize != 0
 
-    def _check(self):
+    def _check(self) -> BatchedDeque[T]:
         half = (self.fsize + self.rsize) // 2
         if self.fsize == 0:
             self.f = self.r.drop(half).reverse()
@@ -25,40 +32,38 @@ class BatchedDeque:
             self.fsize = half
         return self
 
-    def cons(self, value):
-        return BatchedDeque(self.fsize + 1, self.f.cons(value),
-                            self.rsize, self.r)._check()
+    def cons(self, value: T) -> BatchedDeque[T]:
+        return BatchedDeque[T](self.fsize + 1, self.f.cons(value),
+                               self.rsize, self.r)._check()
 
-    def head(self):
+    def head(self) -> T:
         if not self:
             raise IndexError("head from empty deque")
-        if self.fsize == 0:
-            return self.r.head()
-        return self.f.head()
+        head: T = self.r.head() if self.fsize == 0 else self.f.head()
+        return head
 
-    def tail(self):
+    def tail(self) -> BatchedDeque[T]:
         if not self:
             raise IndexError("tail from empty deque")
         if self.fsize == 0:
-            return BatchedDeque()
-        return BatchedDeque(self.fsize - 1, self.f.tail(),
-                            self.rsize, self.r)._check()
+            return BatchedDeque[T]()
+        return BatchedDeque[T](self.fsize - 1, self.f.tail(),
+                               self.rsize, self.r)._check()
 
-    def snoc(self, value):
-        return BatchedDeque(self.fsize, self.f,
-                            self.rsize + 1, self.r.cons(value))._check()
+    def snoc(self, value: T) -> BatchedDeque[T]:
+        return BatchedDeque[T](self.fsize, self.f,
+                               self.rsize + 1, self.r.cons(value))._check()
 
-    def last(self):
+    def last(self) -> T:
         if not self:
             raise IndexError("last from empty deque")
-        if self.rsize == 0:
-            return self.f.head()
-        return self.r.head()
+        last: T = self.f.head() if self.rsize == 0 else self.r.head()
+        return last
 
-    def init(self):
+    def init(self) -> BatchedDeque[T]:
         if not self:
             raise IndexError("init from empty deque")
         if self.rsize == 0:
             return BatchedDeque()
-        return BatchedDeque(self.fsize, self.f,
-                            self.rsize - 1, self.r.tail())._check()
+        return BatchedDeque[T](self.fsize, self.f,
+                               self.rsize - 1, self.r.tail())._check()

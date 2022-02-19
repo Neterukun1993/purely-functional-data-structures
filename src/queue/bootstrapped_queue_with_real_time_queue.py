@@ -1,48 +1,57 @@
-from src.basic.list_stack import ListStack
-from src.basic.suspension import Suspension
-from src.queue.real_time_queue import RealTimeQueue
+from __future__ import annotations
+from typing import TypeVar, Generic, Optional
+from src.basic.list_stack import ListStack  # type: ignore
+from src.basic.suspension import Suspension  # type: ignore
+from src.queue.real_time_queue import RealTimeQueue  # type: ignore
 
 
-class BootstrappedQueue:
-    def __init__(self, fmsize=0, f=None, m=None, rsize=0, r=None):
-        self.fmsize = fmsize
-        self.f = ListStack() if f is None else f
-        self.m = RealTimeQueue() if m is None else m
-        self.rsize = rsize
-        self.r = ListStack() if r is None else r
+T = TypeVar('T')
 
-    def __bool__(self):
+
+class BootstrappedQueue(Generic[T]):
+    def __init__(self,
+                 fmsize: int = 0, f: Optional[ListStack[T]] = None,
+                 m: Optional[RealTimeQueue[T]] = None,
+                 rsize: int = 0, r: Optional[ListStack[T]] = None) -> None:
+        self.fmsize: int = fmsize
+        self.f: ListStack[T] = ListStack() if f is None else f
+        self.m: RealTimeQueue[T] = RealTimeQueue() if m is None else m
+        self.rsize: int = rsize
+        self.r: ListStack[T] = ListStack() if r is None else r
+
+    def __bool__(self) -> bool:
         return self.fmsize != 0
 
-    def _check_q(self):
+    def _check_q(self) -> BootstrappedQueue[T]:
         if self.fmsize >= self.rsize:
             return self._check_f()
         else:
             susp = Suspension(lambda: self.r.reverse())
-            return BootstrappedQueue(self.fmsize + self.rsize, self.f,
-                                     self.m.snoc(susp), 0,
-                                     ListStack())._check_f()
+            return BootstrappedQueue[T](self.fmsize + self.rsize, self.f,
+                                        self.m.snoc(susp), 0,
+                                        ListStack())._check_f()
 
-    def _check_f(self):
+    def _check_f(self) -> BootstrappedQueue[T]:
         if not self.f and not self.m:
-            return BootstrappedQueue()
-        elif not self.f:
-            return BootstrappedQueue(self.fmsize, self.m.head().force(),
-                                     self.m.tail(), self.rsize, self.r)
-        else:
-            return self
+            return BootstrappedQueue[T]()
+        if not self.f:
+            return BootstrappedQueue[T](self.fmsize, self.m.head().force(),
+                                        self.m.tail(), self.rsize, self.r)
+        return self
 
-    def snoc(self, value):
-        return BootstrappedQueue(self.fmsize, self.f, self.m, self.rsize + 1,
-                                 self.r.cons(value))._check_q()
+    def snoc(self, value: T) -> BootstrappedQueue[T]:
+        return BootstrappedQueue[T](self.fmsize, self.f, self.m,
+                                    self.rsize + 1,
+                                    self.r.cons(value))._check_q()
 
-    def head(self):
+    def head(self) -> T:
         if not self:
             raise IndexError("head from empty queue")
-        return self.f.head()
+        head: T = self.f.head()
+        return head
 
-    def tail(self):
+    def tail(self) -> BootstrappedQueue[T]:
         if not self:
             raise IndexError("tail from empty queue")
-        return BootstrappedQueue(self.fmsize - 1, self.f.tail(), self.m,
-                                 self.rsize, self.r)._check_q()
+        return BootstrappedQueue[T](self.fmsize - 1, self.f.tail(), self.m,
+                                    self.rsize, self.r)._check_q()

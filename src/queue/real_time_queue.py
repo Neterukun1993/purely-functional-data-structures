@@ -1,40 +1,50 @@
-from src.basic.list_stack import ListStack
-from src.basic.stream import Stream
+from __future__ import annotations
+from typing import TypeVar, Generic, Optional
+from src.basic.list_stack import ListStack  # type: ignore
+from src.basic.stream import Stream  # type: ignore
 
 
-class RealTimeQueue:
-    def __init__(self, f=None, r=None, s=None):
-        self.f = Stream() if f is None else f
-        self.r = ListStack() if r is None else r
-        self.s = Stream() if s is None else s
+T = TypeVar('T')
 
-    def __bool__(self):
+
+class RealTimeQueue(Generic[T]):
+    def __init__(self,
+                 f: Optional[Stream[T]] = None,
+                 r: Optional[ListStack[T]] = None,
+                 s: Optional[Stream[T]] = None) -> None:
+        self.f: Stream[T] = Stream() if f is None else f
+        self.r: ListStack[T] = ListStack() if r is None else r
+        self.s: Stream[T] = Stream() if s is None else s
+
+    def __bool__(self) -> bool:
         return self.f is not Stream()
 
     @staticmethod
-    def _rotate(f, r, s):
+    def _rotate(f: Stream[T], r: ListStack[T], s: Stream[T]) -> Stream[T]:
         if not f:
             return s.cons(r.head())
-        func = lambda: (f.head(), RealTimeQueue._rotate(f.tail(),
-                                                        r.tail(),
-                                                        s.cons(r.head())))
+        func = lambda: (  # noqa: E731
+            f.head(),
+            RealTimeQueue._rotate(f.tail(), r.tail(), s.cons(r.head()))
+        )
         return Stream(func)
 
-    def _exec(self):
+    def _exec(self) -> RealTimeQueue[T]:
         if self.s:
-            return RealTimeQueue(self.f, self.r, self.s.tail())
+            return RealTimeQueue[T](self.f, self.r, self.s.tail())
         f = RealTimeQueue._rotate(self.f, self.r, Stream())
-        return RealTimeQueue(f, ListStack(), f)
+        return RealTimeQueue[T](f, ListStack(), f)
 
-    def snoc(self, value):
-        return RealTimeQueue(self.f, self.r.cons(value), self.s)._exec()
+    def snoc(self, value: T) -> RealTimeQueue[T]:
+        return RealTimeQueue[T](self.f, self.r.cons(value), self.s)._exec()
 
-    def head(self):
+    def head(self) -> T:
         if not self:
             raise IndexError("head from empty queue")
-        return self.f.head()
+        head: T = self.f.head()
+        return head
 
-    def tail(self):
+    def tail(self) -> RealTimeQueue[T]:
         if not self:
             raise IndexError("tail from empty queue")
-        return RealTimeQueue(self.f.tail(), self.r, self.s)._exec()
+        return RealTimeQueue[T](self.f.tail(), self.r, self.s)._exec()

@@ -1,45 +1,55 @@
-from src.basic.list_stack import ListStack
-from src.basic.suspension import Suspension
+from __future__ import annotations
+from typing import TypeVar, Generic, Optional
+from src.basic.list_stack import ListStack  # type: ignore
+from src.basic.suspension import Suspension  # type: ignore
 
 
-class PhysicistsQueue:
-    def __init__(self, w=None, fsize=0, f=None, rsize=0, r=None):
-        self.working = w if w is not None else ListStack()
-        self.fsize = fsize
-        self.f = f if f is not None else Suspension(lambda: ListStack())
-        self.rsize = rsize
-        self.r = r if r is not None else ListStack()
+T = TypeVar('T')
 
-    def __bool__(self):
+
+class PhysicistsQueue(Generic[T]):
+    def __init__(self,
+                 w: Optional[ListStack[T]] = None,
+                 fsize: int = 0, f: Suspension[ListStack[T]] = None,
+                 rsize: int = 0, r: ListStack[T] = None) -> None:
+        self.working: ListStack[T] = ListStack() if w is None else w
+        self.fsize: int = fsize
+        self.f: Suspension[ListStack[T]] = (Suspension(lambda: ListStack())
+                                            if f is None else f)
+        self.rsize: int = rsize
+        self.r: ListStack[T] = ListStack() if r is None else r
+
+    def __bool__(self) -> bool:
         return self.fsize != 0
 
-    def _checkw(self):
+    def _checkw(self) -> PhysicistsQueue[T]:
         if not self.working:
-            return PhysicistsQueue(self.f.force(), self.fsize, self.f,
-                                   self.rsize, self.r)
+            return PhysicistsQueue[T](self.f.force(), self.fsize, self.f,
+                                      self.rsize, self.r)
         else:
             return self
 
-    def _check(self):
+    def _check(self) -> PhysicistsQueue[T]:
         if self.rsize <= self.fsize:
             return self._checkw()
         f = self.f.force()
         susp = Suspension(lambda: f.concat(self.r.reverse()))
-        return PhysicistsQueue(f, self.fsize + self.rsize, susp,
-                               0, ListStack())._checkw()
+        return PhysicistsQueue[T](f, self.fsize + self.rsize, susp,
+                                  0, ListStack())._checkw()
 
-    def snoc(self, value):
-        return PhysicistsQueue(self.working, self.fsize, self.f,
-                               self.rsize + 1, self.r.cons(value))._check()
+    def snoc(self, value: T) -> PhysicistsQueue[T]:
+        return PhysicistsQueue[T](self.working, self.fsize, self.f,
+                                  self.rsize + 1, self.r.cons(value))._check()
 
-    def head(self):
+    def head(self) -> T:
         if not self.working:
             raise IndexError("head from empty queue")
-        return self.working.head()
+        head: T = self.working.head()
+        return head
 
-    def tail(self):
+    def tail(self) -> PhysicistsQueue[T]:
         if not self.working:
             raise IndexError("tail from empty queue")
         susp = Suspension(lambda: self.f.force().tail())
-        return PhysicistsQueue(self.working.tail(), self.fsize - 1, susp,
-                               self.rsize, self.r)._check()
+        return PhysicistsQueue[T](self.working.tail(), self.fsize - 1, susp,
+                                  self.rsize, self.r)._check()

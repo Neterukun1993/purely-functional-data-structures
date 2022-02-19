@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import TypeVar, Generic
-from src.basic.list_stack import ListStack
-from src.basic.suspension import Suspension
+from src.basic.list_stack import ListStack  # type: ignore
+from src.basic.suspension import Suspension  # type: ignore
 
 
 T = TypeVar('T')
