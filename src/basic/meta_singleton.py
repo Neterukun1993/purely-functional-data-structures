@@ -1,12 +1,12 @@
 from __future__ import annotations
-from typing import TypeVar, Generic, ClassVar, Dict, Any
+from typing import TypeVar, Generic, Dict, Any
 
 
 T = TypeVar('T')
 
 
 class MetaSingleton(type, Generic[T]):
-    Nil: ClassVar[Dict[MetaSingleton[T], T]] = {}
+    Nil: Dict[MetaSingleton[T], T] = {}
 
     def __call__(cls: MetaSingleton[T],  # type: ignore[override]
                  *args: Any) -> T:
