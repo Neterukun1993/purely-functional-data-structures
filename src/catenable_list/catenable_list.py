@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import TypeVar, Generic, Optional, cast
+from typing import TypeVar, Generic, Optional
 from src.basic.meta_singleton import MetaSingleton  # type: ignore
 from src.basic.suspension import Suspension  # type: ignore
 from src.queue.real_time_queue import RealTimeQueue  # type: ignore
@@ -9,12 +9,14 @@ T = TypeVar('T')
 
 
 class CatenableList(Generic[T], metaclass=MetaSingleton):
+    _head: T
+    q:  RealTimeQueue[Suspension[CatenableList[T]]]
+
     def __init__(self, _head: Optional[T] = None,
                  q: Optional[RealTimeQueue[T]] = None) -> None:
-        self._head: Optional[T] = _head
-        self.q: RealTimeQueue[Suspension[CatenableList[T]]] = (
-            RealTimeQueue() if q is None else q
-        )
+        if _head is not None:
+            self._head = _head
+        self.q = RealTimeQueue() if q is None else q
 
     def __bool__(self) -> bool:
         return self is not CatenableList()
@@ -50,8 +52,7 @@ class CatenableList(Generic[T], metaclass=MetaSingleton):
     def head(self) -> T:
         if not self:
             raise IndexError("head from empty list")
-        head = cast(T, self._head)
-        return head
+        return self._head
 
     def tail(self) -> CatenableList[T]:
         if not self:

@@ -1,19 +1,26 @@
 from __future__ import annotations
-from typing import TypeVar, Generic, Optional, cast
-from src.basic.comparable import Comparable
-from src.basic.meta_singleton import MetaSingleton
+from typing import TypeVar, Generic, Optional
+from src.basic.comparable import Comparable  # type: ignore
+from src.basic.meta_singleton import MetaSingleton  # type: ignore
 
 
 T = TypeVar('T', bound=Comparable)
 
 
 class UnbalancedSet(Generic[T], metaclass=MetaSingleton):
+    value: T
+    tr: UnbalancedSet[T]
+    tl: UnbalancedSet[T]
+
     def __init__(self, value: Optional[T] = None,
-                 tr: Optional[UnbalancedSet[T]] = None,
-                 tl: Optional[UnbalancedSet[T]] = None) -> None:
-        self.value: T = cast(T, value)
-        self.tr: UnbalancedSet[T] = cast(UnbalancedSet[T], tl)
-        self.tl: UnbalancedSet[T] = cast(UnbalancedSet[T], tr)
+                 tl: Optional[UnbalancedSet[T]] = None,
+                 tr: Optional[UnbalancedSet[T]] = None) -> None:
+        if value is not None:
+            self.value = value
+        if tl is not None:
+            self.tl = tl
+        if tr is not None:
+            self.tr = tr
 
     def __bool__(self) -> bool:
         return self is not UnbalancedSet()

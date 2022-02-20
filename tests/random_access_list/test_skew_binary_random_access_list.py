@@ -65,7 +65,7 @@ class TestList:
         new = list_
         new = new.update(0, -4)
         assert [new.lookup(i) for i in range(5)] == [-4, 3, 2, 1, 0]
-        new = new.update(1, -3) 
+        new = new.update(1, -3)
         assert [new.lookup(i) for i in range(5)] == [-4, -3, 2, 1, 0]
         new = new.update(2, -2)
         assert [new.lookup(i) for i in range(5)] == [-4, -3, -2, 1, 0]

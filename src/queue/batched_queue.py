@@ -7,11 +7,14 @@ T = TypeVar('T')
 
 
 class BatchedQueue(Generic[T]):
+    f: ListStack[T]
+    r: ListStack[T]
+
     def __init__(self,
                  f: Optional[ListStack[T]] = None,
                  r: Optional[ListStack[T]] = None) -> None:
-        self.f: ListStack[T] = ListStack() if f is None else f
-        self.r: ListStack[T] = ListStack() if r is None else r
+        self.f = ListStack() if f is None else f
+        self.r = ListStack() if r is None else r
 
     def __bool__(self) -> bool:
         return self.f is not ListStack()

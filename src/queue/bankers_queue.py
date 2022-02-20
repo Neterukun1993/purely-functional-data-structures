@@ -7,13 +7,18 @@ T = TypeVar('T')
 
 
 class BankersQueue(Generic[T]):
+    fsize: int
+    f: Stream[T]
+    rsize: int
+    r: Stream[T]
+
     def __init__(self,
                  fsize: int = 0, f: Optional[Stream[T]] = None,
                  rsize: int = 0, r: Optional[Stream[T]] = None) -> None:
-        self.fsize: int = fsize
-        self.f: Stream[T] = Stream() if f is None else f
-        self.rsize: int = rsize
-        self.r: Stream[T] = Stream() if r is None else r
+        self.fsize = fsize
+        self.f = Stream() if f is None else f
+        self.rsize = rsize
+        self.r = Stream() if r is None else r
 
     def __bool__(self) -> bool:
         return self.fsize != 0

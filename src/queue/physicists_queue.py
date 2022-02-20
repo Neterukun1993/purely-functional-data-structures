@@ -8,16 +8,21 @@ T = TypeVar('T')
 
 
 class PhysicistsQueue(Generic[T]):
+    working: ListStack[T]
+    fsize: int
+    f: Suspension[ListStack[T]]
+    rsize: int
+    r: ListStack[T]
+
     def __init__(self,
                  w: Optional[ListStack[T]] = None,
                  fsize: int = 0, f: Suspension[ListStack[T]] = None,
                  rsize: int = 0, r: ListStack[T] = None) -> None:
-        self.working: ListStack[T] = ListStack() if w is None else w
-        self.fsize: int = fsize
-        self.f: Suspension[ListStack[T]] = (Suspension(lambda: ListStack())
-                                            if f is None else f)
-        self.rsize: int = rsize
-        self.r: ListStack[T] = ListStack() if r is None else r
+        self.working = ListStack() if w is None else w
+        self.fsize = fsize
+        self.f = (Suspension(lambda: ListStack()) if f is None else f)
+        self.rsize = rsize
+        self.r = ListStack() if r is None else r
 
     def __bool__(self) -> bool:
         return self.fsize != 0

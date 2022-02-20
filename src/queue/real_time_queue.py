@@ -8,13 +8,17 @@ T = TypeVar('T')
 
 
 class RealTimeQueue(Generic[T]):
+    f: Stream[T]
+    r: ListStack[T]
+    s: Stream[T]
+
     def __init__(self,
                  f: Optional[Stream[T]] = None,
                  r: Optional[ListStack[T]] = None,
                  s: Optional[Stream[T]] = None) -> None:
-        self.f: Stream[T] = Stream() if f is None else f
-        self.r: ListStack[T] = ListStack() if r is None else r
-        self.s: Stream[T] = Stream() if s is None else s
+        self.f = Stream() if f is None else f
+        self.r = ListStack() if r is None else r
+        self.s = Stream() if s is None else s
 
     def __bool__(self) -> bool:
         return self.f is not Stream()

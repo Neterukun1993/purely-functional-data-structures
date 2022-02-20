@@ -1,7 +1,7 @@
 from __future__ import annotations
-from typing import TypeVar, Generic, Optional, cast
-from src.basic.comparable import Comparable
-from src.basic.meta_singleton import MetaSingleton
+from typing import TypeVar, Generic, Optional
+from src.basic.comparable import Comparable  # type: ignore
+from src.basic.meta_singleton import MetaSingleton  # type: ignore
 
 
 T = TypeVar('T', bound=Comparable)
@@ -11,16 +11,19 @@ B, R = 0, 1
 class RedBlackSet(Generic[T], metaclass=MetaSingleton):
     color: int
     value: T
-    tr: RedBlackSet[T]
     tl: RedBlackSet[T]
+    tr: RedBlackSet[T]
 
     def __init__(self, color: int = B, value: Optional[T] = None,
-                 tr: Optional[RedBlackSet[T]] = None,
-                 tl: Optional[RedBlackSet[T]] = None) -> None:
+                 tl: Optional[RedBlackSet[T]] = None,
+                 tr: Optional[RedBlackSet[T]] = None) -> None:
         self.color = color
-        self.value = cast(T, value)
-        self.tr = cast(RedBlackSet[T], tl)
-        self.tl = cast(RedBlackSet[T], tr)
+        if value is not None:
+            self.value = value
+        if tl is not None:
+            self.tl = tl
+        if tr is not None:
+            self.tr = tr
 
     def __bool__(self) -> bool:
         return self is not RedBlackSet()
@@ -62,9 +65,11 @@ class RedBlackSet(Generic[T], metaclass=MetaSingleton):
             if not s:
                 return RedBlackSet(R, value, RedBlackSet(), RedBlackSet())
             elif value < s.value:
-                return RedBlackSet(s.color, s.value, ins(s.tl), s.tr)._balance()
+                return RedBlackSet(s.color, s.value,
+                                   ins(s.tl), s.tr)._balance()
             elif value > s.value:
-                return RedBlackSet(s.color, s.value, s.tl, ins(s.tr))._balance()
+                return RedBlackSet(s.color, s.value,
+                                   s.tl, ins(s.tr))._balance()
             return s
         set_ = ins(self)
         set_.color = B

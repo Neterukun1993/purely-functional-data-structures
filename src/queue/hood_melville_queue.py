@@ -29,13 +29,19 @@ class Idle(RotationState):
 
 
 class Reversing(Generic[T], RotationState):
+    ok: int
+    f: ListStack[T]
+    fp: ListStack[T]
+    r: ListStack[T]
+    rp: ListStack[T]
+
     def __init__(self, ok: int, f: ListStack[T], fp: ListStack[T],
                  r: ListStack[T], rp: ListStack[T]) -> None:
-        self.ok: int = ok
-        self.f: ListStack[T] = f
-        self.fp: ListStack[T] = fp
-        self.r: ListStack[T] = r
-        self.rp: ListStack[T] = rp
+        self.ok = ok
+        self.f = f
+        self.fp = fp
+        self.r = r
+        self.rp = rp
 
     def invalidate(self) -> Reversing[T]:
         return Reversing[T](self.ok - 1, self.f, self.fp, self.r, self.rp)
@@ -49,10 +55,14 @@ class Reversing(Generic[T], RotationState):
 
 
 class Appending(Generic[T], RotationState):
+    ok: int
+    f: ListStack[T]
+    r: ListStack[T]
+
     def __init__(self, ok: int, f: ListStack[T], r: ListStack[T]) -> None:
-        self.ok: int = ok
-        self.f: ListStack[T] = f
-        self.r: ListStack[T] = r
+        self.ok = ok
+        self.f = f
+        self.r = r
 
     def invalidate(self) -> Union[Appending[T], Done[T]]:
         if self.ok == 0:
@@ -67,8 +77,10 @@ class Appending(Generic[T], RotationState):
 
 
 class Done(Generic[T], RotationState):
+    f: ListStack[T]
+
     def __init__(self, f: ListStack[T]) -> None:
-        self.f: ListStack[T] = f
+        self.f = f
 
     def invalidate(self) -> Done[T]:
         return self
@@ -78,15 +90,21 @@ class Done(Generic[T], RotationState):
 
 
 class HoodMelvilleQueue(Generic[T]):
+    fsize: int
+    f: ListStack[T]
+    state: RotationState
+    rsize: int
+    r: ListStack[T]
+
     def __init__(self,
                  fsize: int = 0, f: Optional[ListStack[T]] = None,
                  state: Optional[RotationState] = None,
                  rsize: int = 0, r: Optional[ListStack[T]] = None) -> None:
-        self.fsize: int = fsize
-        self.f: ListStack[T] = ListStack() if f is None else f
-        self.state: RotationState = Idle() if state is None else state
-        self.rsize: int = rsize
-        self.r: ListStack[T] = ListStack() if r is None else r
+        self.fsize = fsize
+        self.f = ListStack() if f is None else f
+        self.state = Idle() if state is None else state
+        self.rsize = rsize
+        self.r = ListStack() if r is None else r
 
     def __bool__(self) -> bool:
         return self.fsize != 0

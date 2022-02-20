@@ -1,28 +1,41 @@
-class LeftistHeap:
-    E = None
+from __future__ import annotations
+from typing import TypeVar, Generic, Optional
+from src.basic.meta_singleton import MetaSingleton  # type: ignore
+from src.basic.comparable import Comparable  # type: ignore
 
-    def __new__(cls, *args):
-        if cls.E is None:
-            cls.E = super().__new__(cls)
-        return super().__new__(cls) if args else cls.E
 
-    def __init__(self, rank=0, value=None, a=None, b=None):
+CT = TypeVar('CT', bound=Comparable)
+
+
+class LeftistHeap(Generic[CT], metaclass=MetaSingleton):
+    rank: int
+    value: CT
+    a: LeftistHeap[CT]
+    b: LeftistHeap[CT]
+
+    def __init__(self, rank: int = 0, value: Optional[CT] = None,
+                 a: Optional[LeftistHeap[CT]] = None,
+                 b: Optional[LeftistHeap[CT]] = None) -> None:
         self.rank = rank
-        self.value = value
-        self.a = a
-        self.b = b
+        if value is not None:
+            self.value = value
+        if a is not None:
+            self.a = a
+        if b is not None:
+            self.b = b
 
-    def __bool__(self):
-        return self is not LeftistHeap.E
+    def __bool__(self) -> bool:
+        return self is not LeftistHeap()
 
     @staticmethod
-    def _make(value, a, b):
+    def _make(value: CT, a: LeftistHeap[CT],
+              b: LeftistHeap[CT]) -> LeftistHeap[CT]:
         if a.rank >= b.rank:
             a, b = b, a
         return LeftistHeap(a.rank + 1, value, b, a)
 
     @staticmethod
-    def merge(hl, hr):
+    def merge(hl: LeftistHeap[CT], hr: LeftistHeap[CT]) -> LeftistHeap[CT]:
         if not hl:
             return hr
         elif not hr:
@@ -34,16 +47,17 @@ class LeftistHeap:
             return LeftistHeap._make(hr.value, hr.a,
                                      LeftistHeap.merge(hl, hr.b))
 
-    def insert(self, value):
-        new = LeftistHeap(1, value, LeftistHeap.E, LeftistHeap.E)
+    def insert(self, value: CT) -> LeftistHeap[CT]:
+        new: LeftistHeap[CT] = LeftistHeap(1, value,
+                                           LeftistHeap(), LeftistHeap())
         return LeftistHeap.merge(new, self)
 
-    def find_min(self):
-        if self is LeftistHeap.E:
+    def find_min(self) -> CT:
+        if not self:
             raise IndexError("find from empty heap")
         return self.value
 
-    def delete_min(self):
-        if self is LeftistHeap.E:
+    def delete_min(self) -> LeftistHeap[CT]:
+        if not self:
             raise IndexError("delete from empty heap")
         return self.merge(self.a, self.b)

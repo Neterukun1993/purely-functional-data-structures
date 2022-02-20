@@ -7,13 +7,18 @@ T = TypeVar('T')
 
 
 class BatchedDeque(Generic[T]):
+    fsize: int
+    f: ListStack[T]
+    rsize: int
+    r: ListStack[T]
+
     def __init__(self,
                  fsize: int = 0, f: Optional[ListStack[T]] = None,
                  rsize: int = 0, r: Optional[ListStack[T]] = None) -> None:
-        self.fsize: int = fsize
-        self.f: ListStack[T] = ListStack() if f is None else f
-        self.rsize: int = rsize
-        self.r: ListStack[T] = ListStack() if r is None else r
+        self.fsize = fsize
+        self.f = ListStack() if f is None else f
+        self.rsize = rsize
+        self.r = ListStack() if r is None else r
 
     def __bool__(self) -> bool:
         return self.fsize + self.rsize != 0

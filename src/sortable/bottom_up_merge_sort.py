@@ -8,11 +8,14 @@ T = TypeVar('T')
 
 
 class BottomUpMergeSort(Generic[T]):
+    size: int
+    segs: Suspension[ListStack[ListStack[T]]]
+
     def __init__(self, size: int = 0,
                  segs: Suspension[ListStack[ListStack[T]]]
                  = Suspension(ListStack())) -> None:
-        self.size: int = size
-        self.segs: Suspension[ListStack[ListStack[T]]] = segs
+        self.size = size
+        self.segs = segs
 
     def __bool__(self) -> bool:
         return self.size != 0

@@ -1,6 +1,6 @@
 from __future__ import annotations
-from typing import TypeVar, Generic, cast, Tuple, Union, Callable
-from src.basic.meta_singleton import MetaSingleton
+from typing import TypeVar, Generic, cast, Tuple, Union, Callable, Iterator
+from src.basic.meta_singleton import MetaSingleton  # type: ignore
 
 
 T = TypeVar('T')
@@ -9,6 +9,8 @@ StreamCell = Union[None, Callable[[], StreamPair[T]], StreamPair[T]]
 
 
 class Stream(Generic[T], metaclass=MetaSingleton):
+    stream_cell: StreamCell[T]
+
     def __init__(self, stream_cell: StreamCell[T] = None) -> None:
         self.stream_cell = stream_cell
 
@@ -41,7 +43,7 @@ class Stream(Generic[T], metaclass=MetaSingleton):
     def concat(self, other: Stream[T]) -> Stream[T]:
         if not self:
             return other
-        func = lambda: (self.head(), self.tail().concat(other))
+        func = lambda: (self.head(), self.tail().concat(other))  # noqa: E731
         return Stream[T](func)
 
     def reverse(self) -> Stream[T]:
@@ -55,7 +57,7 @@ class Stream(Generic[T], metaclass=MetaSingleton):
     def take(self, n: int) -> Stream[T]:
         if n == 0 or not self:
             return Stream[T]()
-        func = lambda: (self.head(), self.tail().take(n - 1))
+        func = lambda: (self.head(), self.tail().take(n - 1))  # noqa: E731
         return Stream[T](func)
 
     def drop(self, n: int) -> Stream[T]:

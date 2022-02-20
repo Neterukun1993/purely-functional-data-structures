@@ -5,8 +5,10 @@ T = TypeVar('T')
 
 
 class Suspension(Generic[T]):
+    func: Union[T, Callable[[], T]]
+
     def __init__(self, func: Callable[[], T]) -> None:
-        self.func: Union[T, Callable[[], T]] = func
+        self.func = func
 
     def force(self) -> T:
         if callable(self.func):

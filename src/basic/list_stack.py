@@ -1,17 +1,22 @@
 from __future__ import annotations
-from typing import TypeVar, Generic, Optional, Iterator, cast
-from src.basic.meta_singleton import MetaSingleton
+from typing import TypeVar, Generic, Optional, Iterator
+from src.basic.meta_singleton import MetaSingleton  # type: ignore
 
 
 T = TypeVar('T')
 
 
 class ListStack(Generic[T], metaclass=MetaSingleton):
+    _head: T
+    _tail: ListStack[T]
+
     def __init__(self,
                  head: Optional[T] = None,
                  tail: Optional[ListStack[T]] = None) -> None:
-        self._head = cast(T, head)
-        self._tail = cast(ListStack[T], tail)
+        if head is not None:
+            self._head = head
+        if tail is not None:
+            self._tail = tail
 
     def __bool__(self) -> bool:
         return self is not ListStack[T]()
@@ -27,12 +32,12 @@ class ListStack(Generic[T], metaclass=MetaSingleton):
 
     def head(self) -> T:
         if self is ListStack[T]():
-            raise IndexError("pop from empty list")
+            raise IndexError("head from empty list")
         return self._head
 
     def tail(self) -> ListStack[T]:
         if self is ListStack[T]():
-            raise IndexError("pop from empty list")
+            raise IndexError("tail from empty list")
         return self._tail
 
     def reverse(self) -> ListStack[T]:

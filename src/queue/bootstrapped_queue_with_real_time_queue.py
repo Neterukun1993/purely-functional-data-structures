@@ -9,15 +9,21 @@ T = TypeVar('T')
 
 
 class BootstrappedQueue(Generic[T]):
+    fmsize: int
+    f: ListStack[T]
+    m: RealTimeQueue[T]
+    rsize: int
+    r: ListStack[T]
+
     def __init__(self,
                  fmsize: int = 0, f: Optional[ListStack[T]] = None,
                  m: Optional[RealTimeQueue[T]] = None,
                  rsize: int = 0, r: Optional[ListStack[T]] = None) -> None:
-        self.fmsize: int = fmsize
-        self.f: ListStack[T] = ListStack() if f is None else f
-        self.m: RealTimeQueue[T] = RealTimeQueue() if m is None else m
-        self.rsize: int = rsize
-        self.r: ListStack[T] = ListStack() if r is None else r
+        self.fmsize = fmsize
+        self.f = ListStack() if f is None else f
+        self.m = RealTimeQueue() if m is None else m
+        self.rsize = rsize
+        self.r = ListStack() if r is None else r
 
     def __bool__(self) -> bool:
         return self.fmsize != 0
