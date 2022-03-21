@@ -1,5 +1,5 @@
 import pytest
-from src.set.intmap_patricia_tree import IntMapPatriciaTree
+from src.finite_map.intmap_patricia_tree import IntMapPatriciaTree
 
 
 @pytest.fixture
