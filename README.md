@@ -31,7 +31,7 @@ Purely Functional (Persistent) Data Structures in Python
 
 ### heap
 - [左偏ヒープ (Leftist heap)](/src/heap/leftist_heap.py)
-- スプレーヒープ (Splay heap)
+- [スプレーヒープ (Splay heap)](/src/heap/splay_heap.py)
 - [ペアリングヒープ (Pairing heap)](/src/heap/pairing_heap.py)
 - [二項ヒープ (Binomial heap)](/src/heap/binomial_heap.py)
 - [遅延ペアリングヒープ (Lazy pairing heap)](/src/heap/lazy_pairing_heap.py)
